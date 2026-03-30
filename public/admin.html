@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #f1f1f2;
+      min-height: 100vh;
+    }
+
+    /* ======= LOGIN OVERLAY ======= */
+    #admin-login {
+      position: fixed;
+      inset: 0;
+      background: #0f0f0f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .admin-login-box {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .admin-login-box h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .admin-login-box p {
+      font-size: 13px;
+      color: #888;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .admin-login-box .lock-icon {
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 16px;
+    }
+
+    .admin-input {
+      width: 100%;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: #f1f1f2;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+
+    .admin-input:focus {
+      border-color: #fe2c55;
+    }
+
+    .admin-login-btn {
+      width: 100%;
+      background: #fe2c55;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.2s;
+    }
+
+    .admin-login-btn:hover {
+      background: #e61e45;
+    }
+
+    .admin-error {
+      color: #fe2c55;
+      font-size: 13px;
+      text-align: center;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* ======= ADMIN DASHBOARD ======= */
+    #admin-dashboard {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .admin-header {
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .admin-header .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .admin-header .brand .logo {
+      font-size: 24px;
+    }
+
+    .admin-header .brand h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .admin-header .brand span {
+      font-size: 12px;
+      color: #888;
+      margin-left: 6px;
+    }
+
+    .admin-header .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(254,44,85,0.15);
+      border: 1px solid rgba(254,44,85,0.3);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: #fe2c55;
+      font-weight: 600;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #fe2c55;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .logout-btn {
+      background: #2a2a2a;
+      color: #ccc;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #333;
+    }
+
+    .admin-content {
+      padding: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-card .stat-num {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fe2c55;
+    }
+
+    .stat-card .stat-label {
+      font-size: 12px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    .messages-panel {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .messages-panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #2a2a2a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .messages-panel-header h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .clear-btn {
+      background: #2a2a2a;
+      color: #aaa;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .clear-btn:hover {
+      background: #333;
+      color: #fff;
+    }
+
+    .messages-list {
+      max-height: 65vh;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    .messages-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .messages-list::-webkit-scrollbar-track {
+      background: #1a1a1a;
+    }
+
+    .messages-list::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 4px;
+    }
+
+    .message-card {
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      animation: fadeIn 0.3s ease;
+      position: relative;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-card.new-msg {
+      border-color: rgba(254,44,85,0.4);
+      background: rgba(254,44,85,0.05);
+    }
+
+    .message-card .msg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .message-card .msg-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .message-card .avatar-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #fe2c55, #69c9d0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .message-card .name-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .message-card .msg-time {
+      font-size: 11px;
+      color: #555;
+    }
+
+    .message-card .msg-content {
+      font-size: 14px;
+      color: #ccc;
+      line-height: 1.5;
+      padding-left: 42px;
+      word-break: break-word;
+    }
+
+    .message-card .new-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #fe2c55;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #444;
+    }
+
+    .empty-state .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    .msg-count-badge {
+      background: #fe2c55;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .stats-bar { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .stat-card { padding: 12px 8px; }
+      .stat-card .stat-num { font-size: 22px; }
+      .admin-content { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Admin Login -->
+  <div id="admin-login">
+    <div class="admin-login-box">
+      <div class="lock-icon">🔐</div>
+      <h2>Admin Panel</h2>
+      <p>Daxil olmaq üçün məlumatlarınızı daxil edin</p>
+      <input type="text" class="admin-input" id="adminUser" placeholder="İstifadəçi adı" autocomplete="off">
+      <input type="password" class="admin-input" id="adminPass" placeholder="Şifrə" autocomplete="off">
+      <button class="admin-login-btn" onclick="adminLogin()">Daxil ol</button>
+      <div class="admin-error" id="adminError">Yanlış istifadəçi adı və ya şifrə</div>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div id="admin-dashboard">
+    <div class="admin-header">
+      <div class="brand">
+        <div class="logo">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V9a8.18 8.18 0 0 0 4.78 1.52V7.1a4.85 4.85 0 0 1-1.01-.41z" fill="#fe2c55"/>
+          </svg>
+        </div>
+        <h1>Admin Panel <span>gizli kanal</span></h1>
+      </div>
+      <div class="header-right">
+        <div class="live-indicator">
+          <div class="live-dot"></div>
+          CANLI
+        </div>
+        <button class="logout-btn" onclick="adminLogout()">Çıxış</button>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-num" id="totalCount">0</div>
+          <div class="stat-label">Ümumi mesaj</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="todayCount">0</div>
+          <div class="stat-label">Bu gün</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="newCount">0</div>
+          <div class="stat-label">Yeni</div>
+        </div>
+      </div>
+
+      <div class="messages-panel">
+        <div class="messages-panel-header">
+          <div style="display:flex;align-items:center;">
+            <h3>Daxil olan mesajlar</h3>
+            <span class="msg-count-badge" id="msgCountBadge">0</span>
+          </div>
+          <button class="clear-btn" onclick="markAllRead()">Hamısını oxundu et</button>
+        </div>
+        <div class="messages-list" id="messagesList">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📭</div>
+            <p>Hələ heç bir mesaj yoxdur</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = null;
+    var allMessages = [];
+    var newMsgIds = new Set();
+    var isAdmin = false;
+
+    // ============ ADMIN LOGIN ============
+    function adminLogin() {
+      var user = document.getElementById('adminUser').value.trim();
+      var pass = document.getElementById('adminPass').value.trim();
+
+      if (!user || !pass) return;
+
+      fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: user, password: pass })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success) {
+          isAdmin = true;
+          document.getElementById('admin-login').style.display = 'none';
+          document.getElementById('admin-dashboard').style.display = 'block';
+          initAdminSocket();
+        } else {
+          document.getElementById('adminError').style.display = 'block';
+          setTimeout(function() {
+            document.getElementById('adminError').style.display = 'none';
+          }, 3000);
+        }
+      })
+      .catch(function() {
+        document.getElementById('adminError').style.display = 'block';
+      });
+    }
+
+    // Enter key support
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !isAdmin) adminLogin();
+    });
+
+    function adminLogout() {
+      isAdmin = false;
+      if (socket) socket.disconnect();
+      document.getElementById('admin-login').style.display = 'flex';
+      document.getElementById('admin-dashboard').style.display = 'none';
+      document.getElementById('adminUser').value = '';
+      document.getElementById('adminPass').value = '';
+      allMessages = [];
+      newMsgIds.clear();
+    }
+
+    // ============ SOCKET ============
+    function initAdminSocket() {
+      socket = io();
+
+      socket.emit('join-admin', {
+        user: 'FATİMƏ1618',
+        pass: 'majorursa0618'
+      });
+
+      socket.on('all-messages', function(msgs) {
+        allMessages = msgs;
+        renderMessages();
+      });
+
+      socket.on('new-message', function(msg) {
+        allMessages.push(msg);
+        newMsgIds.add(msg.id);
+        renderMessages();
+        // Auto-scroll to top
+        var list = document.getElementById('messagesList');
+        list.scrollTop = 0;
+      });
+    }
+
+    // ============ RENDER ============
+    function renderMessages() {
+      var list = document.getElementById('messagesList');
+      var empty = document.getElementById('emptyState');
+
+      // Update stats
+      document.getElementById('totalCount').textContent = allMessages.length;
+      document.getElementById('msgCountBadge').textContent = allMessages.length;
+
+      var today = new Date().toDateString();
+      var todayMsgs = allMessages.filter(function(m) {
+        return new Date(m.timestamp).toDateString() === today;
+      });
+      document.getElementById('todayCount').textContent = todayMsgs.length;
+      document.getElementById('newCount').textContent = newMsgIds.size;
+
+      if (allMessages.length === 0) {
+        empty.style.display = 'block';
+        // Remove old cards
+        var cards = list.querySelectorAll('.message-card');
+        cards.forEach(function(c) { c.remove(); });
+        return;
+      }
+
+      empty.style.display = 'none';
+
+      // Re-render all messages (newest first)
+      var sorted = allMessages.slice().reverse();
+
+      // Clear existing cards
+      var cards = list.querySelectorAll('.message-card');
+      cards.forEach(function(c) { c.remove(); });
+
+      sorted.forEach(function(msg) {
+        var card = document.createElement('div');
+        card.className = 'message-card' + (newMsgIds.has(msg.id) ? ' new-msg' : '');
+        card.dataset.id = msg.id;
+
+        var initial = (msg.name || '?').charAt(0).toUpperCase();
+        var isNew = newMsgIds.has(msg.id);
+
+        card.innerHTML =
+          '<div class="msg-header">' +
+            '<div class="msg-name">' +
+              '<div class="avatar-circle">' + initial + '</div>' +
+              '<div class="name-text">' + escapeHtml(msg.name) + '</div>' +
+            '</div>' +
+            '<div class="msg-time">' + escapeHtml(msg.time || '') + '</div>' +
+          '</div>' +
+          '<div class="msg-content">' + escapeHtml(msg.message) + '</div>' +
+          (isNew ? '<div class="new-badge">YENİ</div>' : '');
+
+        list.insertBefore(card, list.firstChild.nextSibling || null);
+
+        // Actually prepend after empty state
+      });
+
+      // Now properly order - insert after emptyState
+      var emptyEl = document.getElementById('emptyState');
+      sorted.forEach(function(msg) {
+        var existing = list.querySelector('[data-id="' + msg.id + '"]');
+        if (existing) {
+          list.insertBefore(existing, emptyEl.nextSibling);
+        }
+      });
+    }
+
+    function markAllRead() {
+      newMsgIds.clear();
+      document.getElementById('newCount').textContent = '0';
+      // Remove new-msg class and new badges
+      var cards = document.querySelectorAll('.message-card.new-msg');
+      cards.forEach(function(c) {
+        c.classList.remove('new-msg');
+        var badge = c.querySelector('.new-badge');
+        if (badge) badge.remove();
+      });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Poll for new messages every 5 seconds as fallback
+    setInterval(function() {
+      if (!isAdmin || !socket) return;
+      // Socket handles real-time, this is just a safety net
+    }, 5000);
+  </script>
+</body>
+</html>
